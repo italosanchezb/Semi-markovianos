@@ -1,0 +1,175 @@
+import numpy as np
+
+M = 2
+N = 3
+
+lbd = 0.1
+p = 3
+h = 0.5
+c = 1.5
+
+alpha = 0.6
+epsilon = 0.001
+max_iter = 1000
+
+S = np.linspace(0, M, N)
+f = np.zeros(N)
+
+
+def ell_cero(S, j):
+    if np.isclose(S[j], 0):
+        return 1.0
+    return 0.0
+
+
+def fila_P(S, z_i, lbd):
+
+    N = len(S)
+    fila = np.zeros(N)
+
+    for j in range(N):
+
+        base = ell_cero(S, j) * np.exp(-lbd * z_i)
+
+        if j == 0:
+
+            A = max(0, z_i - S[j + 1])
+            B = min(z_i, z_i - S[j])
+
+            if B <= A:
+                integral = 0.0
+            else:
+                E = np.exp(-lbd * A) - np.exp(-lbd * B)
+
+                X = (
+                    (A + 1 / lbd) * np.exp(-lbd * A)
+                    -
+                    (B + 1 / lbd) * np.exp(-lbd * B)
+                )
+
+                integral = (
+                    (S[j + 1] - z_i) * E + X
+                ) / (S[j + 1] - S[j])
+
+            fila[j] = base + integral
+
+        elif j == N - 1:
+
+            A = max(0, z_i - S[j])
+            B = min(z_i, z_i - S[j - 1])
+
+            if B <= A:
+                integral = 0.0
+            else:
+                E = np.exp(-lbd * A) - np.exp(-lbd * B)
+
+                X = (
+                    (A + 1 / lbd) * np.exp(-lbd * A)
+                    -
+                    (B + 1 / lbd) * np.exp(-lbd * B)
+                )
+
+                integral = (
+                    (z_i - S[j - 1]) * E - X
+                ) / (S[j] - S[j - 1])
+
+            fila[j] = base + integral
+
+        else:
+
+            A_1 = max(0, z_i - S[j + 1])
+            B_1 = min(z_i, z_i - S[j])
+
+            if B_1 <= A_1:
+                I_2 = 0.0
+            else:
+                E_1 = np.exp(-lbd * A_1) - np.exp(-lbd * B_1)
+
+                X_1 = (
+                    (A_1 + 1 / lbd) * np.exp(-lbd * A_1)
+                    -
+                    (B_1 + 1 / lbd) * np.exp(-lbd * B_1)
+                )
+
+                I_2 = (
+                    (S[j + 1] - z_i) * E_1 + X_1
+                ) / (S[j + 1] - S[j])
+
+            A_2 = max(0, z_i - S[j])
+            B_2 = min(z_i, z_i - S[j - 1])
+
+            if B_2 <= A_2:
+                I_3 = 0.0
+            else:
+                E_2 = np.exp(-lbd * A_2) - np.exp(-lbd * B_2)
+
+                X_2 = (
+                    (A_2 + 1 / lbd) * np.exp(-lbd * A_2)
+                    -
+                    (B_2 + 1 / lbd) * np.exp(-lbd * B_2)
+                )
+
+                I_3 = (
+                    (z_i - S[j - 1]) * E_2 - X_2
+                ) / (S[j] - S[j - 1])
+
+            fila[j] = base + I_2 + I_3
+
+    return fila
+
+
+def matriz_P(S, f, lbd):
+
+    N = len(S)
+    P = np.zeros((N, N))
+
+    for i in range(N):
+        z_i = S[i] + f[i]
+        P[i, :] = fila_P(S, z_i, lbd)
+
+    return P
+
+
+for iteracion in range(max_iter):
+
+    Cf = c * f + h * (S + f) + (p / lbd) * np.exp(-lbd * (S + f))
+
+    P = matriz_P(S, f, lbd)
+
+    print("Matriz de transición P:")
+    print(P)
+
+    V = np.linalg.solve(np.eye(N) - alpha * P, Cf)
+
+    f_nueva = np.zeros(N)
+
+    for i in range(N):
+
+        A_i = np.linspace(0, M - S[i], N)
+
+        G_i = []
+
+        for a in A_i:
+
+            z_a = S[i] + a
+
+            Ca_i = c * a + h * z_a + (p / lbd) * np.exp(-lbd * z_a)
+
+            P_a = fila_P(S, z_a, lbd)
+
+            suma = np.dot(P_a, V)
+
+            G_i.append(Ca_i + alpha * suma)
+
+        f_nueva[i] = A_i[np.argmin(G_i)]
+
+    print("Iteración:", iteracion + 1)
+    print("Política:", f_nueva)
+    print("Valor V:", V)
+    print()
+
+    if np.max(np.abs(f_nueva - f)) < epsilon:
+        print("La política convergió.")
+        break
+
+    f = f_nueva
