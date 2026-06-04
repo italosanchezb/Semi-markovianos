@@ -31,9 +31,96 @@ for iteration in range(max_iter):
     print("Vector de costos: ", Cf)
 
     # Matriz de transición P
+    def ell(S, j):
+        if np.isclose(S[j], 0):
+            return 1.0
+        return 0.0
 
     P = np.zeros((N, N))
-    P = np.ones((N, N))
+    for i in range(N):
+
+        z_i = S[i] + f[i]
+
+    for j in range(N):
+
+        if j == 0:
+            # Caso j = 1
+
+            A = np.max([0, z_i - S[j + 1]])
+            B = np.max([0, z_i - S[j]])
+
+            P[i][j] = (
+                ell(S,j) * np.exp(-lbd * z_i)
+                +
+                1 / (S[j + 1] - S[j])
+                * (
+                    (S[j + 1] - z_i)
+                    * (np.exp(-lbd * A) - np.exp(-lbd * B))
+                    +
+                    (A + 1 / lbd) * np.exp(-lbd * A)
+                    -
+                    (B + 1 / lbd) * np.exp(-lbd * B)
+                )
+            )
+
+        elif j == N - 1:
+            # Caso j = N
+
+            A = np.max([0, z_i - S[N - 1]])
+            B = np.max([0, z_i - S[N - 2]])
+
+            P[i][j] = (
+                ell(S, j) * np.exp(-lbd * z_i)
+                +
+                1 / (S[N - 1] - S[N - 2])
+                * (
+                    (z_i - S[N - 2])
+                    * (np.exp(-lbd * A) - np.exp(-lbd * B))
+                    -
+                    (A + 1 / lbd) * np.exp(-lbd * A)
+                    +
+                    (B + 1 / lbd) * np.exp(-lbd * B)
+                )
+            )
+
+        else:
+            # Casos interiores
+
+            A_1 = np.max([0, z_i - S[j + 1]])
+            B_1 = np.max([0, z_i - S[j]])
+
+            A_2 = B_1
+            B_2 = np.max([0, z_i - S[j - 1]])
+
+            I_1 = ell(S, j) * np.exp(-lbd * z_i)
+
+            I_2 = (
+                1 / (S[j + 1] - S[j])
+                * (
+                    (S[j + 1] - z_i)
+                    * (np.exp(-lbd * A_1) - np.exp(-lbd * B_1))
+                    +
+                    (A_1 + 1 / lbd) * np.exp(-lbd * A_1)
+                    -
+                    (B_1 + 1 / lbd) * np.exp(-lbd * B_1)
+                )
+            )
+
+            I_3 = (
+                1 / (S[j] - S[j - 1])
+                * (
+                    (z_i - S[j - 1])
+                    * (np.exp(-lbd * A_2) - np.exp(-lbd * B_2))
+                    -
+                    (A_2 + 1 / lbd) * np.exp(-lbd * A_2)
+                    +
+                    (B_2 + 1 / lbd) * np.exp(-lbd * B_2)
+                )
+            )
+
+            P[i][j] = I_1 + I_2 + I_3
+
+    print("Matriz de transición P: ", P)
 
     # Resolvemos el sistema C= (I-alpha P)V
 

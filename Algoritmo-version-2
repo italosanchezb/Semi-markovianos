@@ -1,7 +1,7 @@
 import numpy as np
 
-M = 2
-N = 3
+M = 2 
+N = 3 
 
 lbd = 0.1
 p = 3
