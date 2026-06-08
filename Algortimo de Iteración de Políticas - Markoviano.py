@@ -3,10 +3,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-M = 2 # Capacidad del inventario
-N = 3 # Número de nodos
+M = 40 # Capacidad del inventario
+N = 100 # Número de nodos
 
-lbd = 0.1 # Parámetro de la distribución de Poisson
+lbd = 0.1 # Parámetro de la distribución exponencial
 p = 3 # Costo unitario por demanda insatisfecha
 h = 0.5 # Costo unitario por almacenamiento
 c = 1.5 # Costo unitario de producción
@@ -27,7 +27,7 @@ for iteration in range(max_iter):
     
     Cf = c * f + h * (S + f) + (p / lbd) * np.exp(-lbd * (S + f))
 
-    print("Vector de costos: ", Cf)
+    #print("Vector de costos: ", Cf)
 
     # Matriz de transición P
     def ell(S, j):
@@ -128,7 +128,7 @@ for iteration in range(max_iter):
 
         P[i, :] = calcular_P_a(z_i)
 
-    print("Matriz de transición P: ", P)
+    #print("Matriz de transición P: ", P)
 
     # Resolvemos el sistema C= (I-alpha P)V
 
