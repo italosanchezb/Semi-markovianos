@@ -9,6 +9,7 @@ alpha = 0.2 # Factor de descuento
 epsilon = 0.0001 # Criterio de convergencia
 max_iter = 1000 # Número máximo de iteraciones  
 b = 0.05 # Parámetro de la función de supervivencia
+q = 0.5
 
 # Distrubución Gamma
 beta = 5    # Parámetro de forma
@@ -157,9 +158,15 @@ for iteracion in range(max_iter):
 
     if V_anterior is not None:
 
-        diference_V =  np.linalg.norm(V-V_anterior, ord=np.inf)
+        W = np.exp(q*S)
 
-        print(f'||V_{iteracion+1} - V_{iteracion}|| = {diference_V}')
+        argumento = np.abs(V_anterior-V)/W
+
+        norma = np.max(argumento)
+
+        x_sup = S[np.argmax(argumento)]
+
+        print(f'||V_{iteracion+1} - V_{iteracion}|| = {norma}')
     
     else:
         print("Primera iteración")
@@ -187,7 +194,7 @@ for iteracion in range(max_iter):
 
     print(f'||f_{iteracion+1} - f_{iteracion}|| = {diference_f}')
 
-    if diference_f < epsilon and diference_V < epsilon:
+    if diference_f < epsilon and norma < epsilon:
 
         converge = True
         f_anterior = f.copy()
