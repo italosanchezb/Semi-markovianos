@@ -6,7 +6,7 @@ M = 10.358  # Cota del conjunto
 N = 100 # Número de nodos
 
 alpha = 0.2 # Factor de descuento
-epsilon = 0.0001 # Criterio de convergencia
+epsilon = 1e-18 # Criterio de convergencia
 max_iter = 1000 # Número máximo de iteraciones  
 b = 0.05 # Parámetro de la función de supervivencia
 q = 0.5
@@ -35,7 +35,7 @@ K_3 = 1 # Costo proporcional al daño
 S = np.linspace(0, M, N)
 
 # Política inicial
-f = np.full(N,0.5)
+f = np.full(N,1)
 
 # Variables para comparar
 f_anterior = None
@@ -45,9 +45,10 @@ V_anterior = None
 converge = False
 
 # Límites de las acciones admisibles
-theta_1 = 0.05
-theta_2 = 20
+theta_1 = sp.stats.gamma.ppf(0.05,a=beta,scale=gma)
+theta_2 = sp.stats.gamma.ppf(0.95,a=beta,scale=gma)
 
+print(theta_1,theta_2)
 
 
 
