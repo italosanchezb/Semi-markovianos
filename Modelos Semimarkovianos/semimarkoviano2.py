@@ -3,24 +3,24 @@ import scipy as sp
 import matplotlib.pyplot as plt
 
 M = 10.358  # Cota del conjunto
-N = 100 # Número de nodos
+N = 200  # Número de nodos
 
 alpha = 0.2 # Factor de descuento
-epsilon = 1e-18 # Criterio de convergencia
+epsilon = 1e-15 # Criterio de convergencia
 max_iter = 1000 # Número máximo de iteraciones  
 b = 0.05 # Parámetro de la función de supervivencia
-q = 0.5
+q = 0.03
 
 # Distrubución Gamma
 beta = 5    # Parámetro de forma
-gma = 1/2     # Parámetro de escala
+gma = 2     # Parámetro de escala
 
 def gamma_cdf(x):
     return sp.stats.gamma.cdf(x, a=beta, scale=gma)
 
 # Distribución Weibull
 rho = 4 # Parámetro de forma
-lbd = 1/5   # Parámetro de escala
+lbd = 5   # Parámetro de escala
 
 def weibull_densidad(x):
     return (rho/lbd)*(x/lbd)**(rho-1)*np.exp(-(x/lbd)**rho)
@@ -34,9 +34,6 @@ K_3 = 1 # Costo proporcional al daño
 # Nodos
 S = np.linspace(0, M, N)
 
-# Política inicial
-f = np.full(N,1)
-
 # Variables para comparar
 f_anterior = None
 V_anterior = None
@@ -45,8 +42,11 @@ V_anterior = None
 converge = False
 
 # Límites de las acciones admisibles
-theta_1 = sp.stats.gamma.ppf(0.05,a=beta,scale=gma)
-theta_2 = sp.stats.gamma.ppf(0.95,a=beta,scale=gma)
+theta_1 = sp.stats.gamma.ppf(0.0001,a=beta,scale=gma)
+theta_2 = sp.stats.gamma.ppf(0.9999,a=beta,scale=gma)
+
+# Política inicial
+f = np.full(N,(theta_1+theta_2)/2)
 
 print(theta_1,theta_2)
 
@@ -187,7 +187,6 @@ for iteracion in range(max_iter):
             raise RuntimeError(f"Optimización fallida en el nodo {i} en la iteración {iteracion + 1}")
         
         f_nueva[i] = min.x
-    
 
     
 
